@@ -49,9 +49,12 @@ def getdata(name):
         datacount+=itemObj['count']
     # print(datalist)
     # # print(datacount)
+
+    datalistsplit = list_split(datalist, 7)
     return {
+        "datemap": datemap,
         "total": datacount,
-        "contributions": datalist
+        "contributions": datalistsplit
     }
 # fetch("https://github.com/cxvh?action=show&controller=profiles&tab=contributions&user_id=cxvh", {
 #   "headers": {
