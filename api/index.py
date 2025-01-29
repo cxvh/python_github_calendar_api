@@ -2,7 +2,7 @@
 import requests
 from http.server import BaseHTTPRequestHandler
 import json
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 headers = {
     "accept": "text/html",
     "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
@@ -20,23 +20,25 @@ def list_split(items, n):
     return [items[i:i + n] for i in range(0, len(items), n)]
 def getdata(name):
     gitpage = requests.get("https://github.com/" + name + "?action=show&controller=profiles&tab=contributions&user_id=" + name, headers=headers)
-    data = BeautifulSoup(gitpage.text, 'html.parser')  
-    dataEle = data.find_all('td', class_='ContributionCalendar-day', attrs={'data-date': True})
-    datadate = [item.attrs['data-date'] for item in dataEle]
-    datacount = [int(item.attrs['data-level']) for item in dataEle]
-    contributions = sum(datacount)
-    datalist = []
-
-    for index, item in enumerate(datadate):
-        itemlist = {"date": item, "count": datacount[index]}
-        datalist.append(itemlist)
-    datalistsplit = list_split(datalist, 7)
-    returndata = {
-        "total": contributions,
-        "contributions": datalistsplit
+    # data = BeautifulSoup(gitpage.text, 'html.parser')  
+    return {
+        "data":gitpage.text
     }
-    print(returndata)
-    return returndata
+    # dataEle = data.find_all('td', class_='ContributionCalendar-day', attrs={'data-date': True})
+    # datadate = [item.attrs['data-date'] for item in dataEle]
+    # datacount = [int(item.attrs['data-level']) for item in dataEle]
+    # contributions = sum(datacount)
+    # datalist = []
+
+    # for index, item in enumerate(datadate):
+    #     itemlist = {"date": item, "count": datacount[index]}
+    #     datalist.append(itemlist)
+    # datalistsplit = list_split(datalist, 7)
+    # returndata = {
+    #     "total": contributions,
+    #     "contributions": datalistsplit
+    # }
+    # return returndata
 # fetch("https://github.com/cxvh?action=show&controller=profiles&tab=contributions&user_id=cxvh", {
 #   "headers": {
 #     "accept": "text/html",
