@@ -1,26 +1,39 @@
 # -*- coding: UTF-8 -*-
 import requests
-import re
 from http.server import BaseHTTPRequestHandler
 import json
-
+import os
+from bs4 import BeautifulSoup
+headers = {
+    "accept": "text/html",
+    "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
+    "if-none-match": 'W/"ef80211272199b848c3cee5f9135b72d"',
+    "priority": "u=1, i",
+    "sec-ch-ua": '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"macOS"',
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-origin",
+    "x-requested-with": "XMLHttpRequest"
+}
 def list_split(items, n):
     return [items[i:i + n] for i in range(0, len(items), n)]
 def getdata(name):
-    gitpage = requests.get("https://github.com/" + name)
+    gitpage = requests.get("https://github.com/" + name + "?action=show&controller=profiles&tab=contributions&user_id=" + name, headers=headers)
     data = gitpage.text
-    datadatereg = re.compile(r'data-date="(.*?)" data-level')
-    datacountreg = re.compile(r'<span class="sr-only">(.*?) contribution')
-    datadate = datadatereg.findall(data)
-    datacount = datacountreg.findall(data)
-    datacount = list(map(int, [0 if i == "No" else i for i in datacount]))
-
-    # 将datadate和datacount按照字典序排序
-    sorted_data = sorted(zip(datadate, datacount))
-    datadate, datacount = zip(*sorted_data)
-    
+    # 写入文件
+    with open('data.html', 'w', encoding='utf-8') as file:
+        file.write(data)
+    # with open(htmltext, 'r', encoding='utf-8') as file:
+    #     dataStr = file.read()
+    data = BeautifulSoup(data, 'html.parser')  
+    dataEle = data.find_all('td', class_='ContributionCalendar-day', attrs={'data-date': True})
+    datadate = [item.attrs['data-date'] for item in dataEle]
+    datacount = [int(item.attrs['data-level']) for item in dataEle]
     contributions = sum(datacount)
     datalist = []
+
     for index, item in enumerate(datadate):
         itemlist = {"date": item, "count": datacount[index]}
         datalist.append(itemlist)
@@ -29,7 +42,29 @@ def getdata(name):
         "total": contributions,
         "contributions": datalistsplit
     }
+    print(returndata)
     return returndata
+# fetch("https://github.com/cxvh?action=show&controller=profiles&tab=contributions&user_id=cxvh", {
+#   "headers": {
+#     "accept": "text/html",
+#     "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
+#     "if-none-match": "W/\"ef80211272199b848c3cee5f9135b72d\"",
+#     "priority": "u=1, i",
+#     "sec-ch-ua": "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
+#     "sec-ch-ua-mobile": "?0",
+#     "sec-ch-ua-platform": "\"macOS\"",
+#     "sec-fetch-dest": "empty",
+#     "sec-fetch-mode": "cors",
+#     "sec-fetch-site": "same-origin",
+#     "x-requested-with": "XMLHttpRequest"
+#   },
+#   "referrer": "https://github.com/cxvh",
+#   "referrerPolicy": "strict-origin-when-cross-origin",
+#   "body": null,
+#   "method": "GET",
+#   "mode": "cors",
+#   "credentials": "include"
+# }).then(res=>res.text())
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         path = self.path
@@ -41,3 +76,7 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps(data).encode('utf-8'))
         return
+# BaseHTTPRequestHandler(('0.0.0.0', PORT), handler).serve_forever()
+# def main(port):
+#     BaseHTTPRequestHandler(('0.0.0.0', port), handler).serve_forever()
+
