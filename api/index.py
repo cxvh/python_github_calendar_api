@@ -37,9 +37,10 @@ def getdata(name):
         datalist.append(itemObj)
         # datemap[item]} 是字符串
         datacount+=int(datemap[item])
+    datalistsplit = list_split(datalist, 7)
     return {
         "total": datacount,
-        "contributions": datalist
+        "contributions": datalistsplit
     }
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
