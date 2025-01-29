@@ -52,8 +52,8 @@ def getdata(name):
 
     datalistsplit = list_split(datalist, 7)
     return {
-        "text": gitpage.text,
-        "matches": matches,
+        # "text": gitpage.text,
+        # "matches": matches,
         "total": datacount,
         "contributions": datalistsplit
     }
