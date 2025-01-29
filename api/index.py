@@ -2,7 +2,6 @@
 import requests
 from http.server import BaseHTTPRequestHandler
 import json
-import os
 from bs4 import BeautifulSoup
 headers = {
     "accept": "text/html",
@@ -21,13 +20,7 @@ def list_split(items, n):
     return [items[i:i + n] for i in range(0, len(items), n)]
 def getdata(name):
     gitpage = requests.get("https://github.com/" + name + "?action=show&controller=profiles&tab=contributions&user_id=" + name, headers=headers)
-    data = gitpage.text
-    # 写入文件
-    with open('data.html', 'w', encoding='utf-8') as file:
-        file.write(data)
-    # with open(htmltext, 'r', encoding='utf-8') as file:
-    #     dataStr = file.read()
-    data = BeautifulSoup(data, 'html.parser')  
+    data = BeautifulSoup(gitpage.text, 'html.parser')  
     dataEle = data.find_all('td', class_='ContributionCalendar-day', attrs={'data-date': True})
     datadate = [item.attrs['data-date'] for item in dataEle]
     datacount = [int(item.attrs['data-level']) for item in dataEle]
@@ -76,7 +69,4 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps(data).encode('utf-8'))
         return
-# BaseHTTPRequestHandler(('0.0.0.0', PORT), handler).serve_forever()
-# def main(port):
-#     BaseHTTPRequestHandler(('0.0.0.0', port), handler).serve_forever()
 
