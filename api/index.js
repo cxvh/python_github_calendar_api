@@ -61,6 +61,13 @@ const cache = new Map();
 
 module.exports = async (req, res) => {
     const user = req.url.split('?')[1];
+    if (user !== 'cxvh') {
+        res.statusCode = 403;
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Content-type', 'application/json');
+        res.end(JSON.stringify({ "error": "仅允许查询 cxvh" }));
+        return;
+    }
     const cached = cache.get(user);
     if (cached && Date.now() - cached.time < CACHE_TTL) {
         res.statusCode = 200;
