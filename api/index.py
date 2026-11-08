@@ -26,7 +26,8 @@ headers = {
 def list_split(items, n):
     return [items[i:i + n] for i in range(0, len(items), n)]
 def getdata(name):
-    gitpage = requests.get("https://github.com/" + name + "?action=show&controller=profiles&tab=contributions&user_id=" + name, headers=headers)
+    gitpage = requests.get("https://github.com/users/" + name + "/contributions", headers=headers, timeout=8)
+    gitpage.raise_for_status()
 
 
     #  data-level="(\d+)"
@@ -91,7 +92,15 @@ class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         path = self.path
         user = path.split('?')[1]
-        data = getdata(user)
+        try:
+            data = getdata(user)
+        except Exception as e:
+            self.send_response(502)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+            return
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Content-type', 'application/json')
