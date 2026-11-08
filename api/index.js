@@ -56,14 +56,28 @@ async function getData(name) {
     };
 }
 
+const CACHE_TTL = 30 * 60 * 1000;
+const cache = new Map();
+
 module.exports = async (req, res) => {
     const user = req.url.split('?')[1];
-    try {
-        const data = await getData(user);
+    const cached = cache.get(user);
+    if (cached && Date.now() - cached.time < CACHE_TTL) {
         res.statusCode = 200;
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Content-type', 'application/json');
-        res.end(JSON.stringify(data));
+        res.setHeader('Cache-Control', 's-maxage=1800');
+        res.end(cached.body);
+        return;
+    }
+    try {
+        const body = JSON.stringify(await getData(user));
+        cache.set(user, { body: body, time: Date.now() });
+        res.statusCode = 200;
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Content-type', 'application/json');
+        res.setHeader('Cache-Control', 's-maxage=1800');
+        res.end(body);
     } catch (e) {
         res.statusCode = 502;
         res.setHeader('Access-Control-Allow-Origin', '*');
