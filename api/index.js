@@ -1,7 +1,7 @@
 async function getData(name) {
     const token = process.env.GITHUB_TOKEN;
     if (!token) {
-        throw new Error("GITHUB_TOKEN 环境变量未配置");
+        throw new Error("GITHUB_TOKEN 环境变量未配置（函数运行时未读到该变量。请检查 Vercel 项目 Settings → Environment Variables：名称必须精确为 GITHUB_TOKEN，且勾选 Production 环境；任何改动后需重新部署才生效）");
     }
 
     const query = `query($login: String!) {
